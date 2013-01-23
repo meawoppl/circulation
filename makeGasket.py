@@ -5,34 +5,43 @@ from circles import radia, circit
 import itertools
 
 
-pointsList = []
+pointList = []
 for i in range(3):
     x = cos(2.0 * pi * i / 3)
     y = sin(2.0 * pi * i / 3)
 
-    pointsList.append((x,y))
+    pointList.append((x,y))
     
-radaiiList = list(radia(*tuple(pointsList)))
+radaiiList = list(radia(*tuple(pointList)))
 
 
-print pointsList
+def circulate(p0, r0, p1, r1, p2, r2, depth):
+    pointList = [p0, p1, p2]
+    radaiList = [r0, r1, r2]
+    p3, r3, p4, r4 = circit(p0, r0, p1, r1, p2, r2)
 
+    pointList += [p3, p4]
+    radaiList += [r3, r4]
+    
+    if depth==0:
+        return pointList, radaiList
+    else:
+        newPL = []
+        newRL = []
+        for indxs in itertools.combinations(range(3), 2):
+            i0, i1 = indxs
+            for i2 in [3, 4]:
+                result = circulate(pointList[i0], radaiList[i0], 
+                                   pointList[i1], radaiList[i1],
+                                   pointList[i2], radaiList[i2], depth-1)
+                newPL += result[0]
+                newRL += result[1]
+        return pointList+newPL, radaiList+newRL
 
-iCount = 2
-for i in range(iCount):
-    newPoints = []
-    newRadaii = []
-    for (i0, i1, i2) in itertools.combinations(range(len(pointsList)), 3):
-        p0, p1, p2 = pointsList[i0], pointsList[i1], pointsList[i2]
-        r0, r1, r2 = radaiiList[i0], radaiiList[i1], radaiiList[i2]
+pl, rl = circulate(pointList[0], radaiiList[0], 
+                   pointList[1], radaiiList[1],
+                   pointList[2], radaiiList[2],5)
 
-        pB, pBr, pS, pSr = circit(p0, r0, p1, r1, p2, r2)
-
-        newPoints += [pB,  pS]
-        newRadaii += [pBr, pSr]
-
-    pointsList += newPoints
-    radaiiList += newRadaii
 
 # Make a pdf surface
 surf =  cairo.PDFSurface(open("test.pdf", "w"), 512, 512)
@@ -40,7 +49,7 @@ surf =  cairo.PDFSurface(open("test.pdf", "w"), 512, 512)
 # Get a context object
 ctx = cairo.Context(surf)
 
-ctx.set_line_width(0.01)
+ctx.set_line_width(0.0001)
 
 ctx.translate(512/2, 512/2)
 ctx.scale(50, 50)
@@ -52,9 +61,9 @@ def drawCircle(ctx, x, y, r):
     ctx.restore()
     ctx.stroke()
     
-for pt, rad in zip(pointsList, radaiiList):
+for pt, rad in zip(pl, rl):
     print pt, rad
-    drawCircle(ctx, pt[0], pt[1], rad)
+    drawCircle(ctx, pt[0], pt[1], abs(rad))
 
 surf.finish()
 
