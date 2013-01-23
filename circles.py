@@ -16,12 +16,10 @@ def radia(p1, p2, p3):
     return r1, r2, r3
 
 
-def circit(p1, p2, p3):
+def circit(p1, r1, p2, r2, p3, r3):
     """Given three points returns center[x], center[y], radius for 
     ... inner and outer circles respectively
     """
-
-    r1, r2, r3 = radia(p1, p2, p3)
     
     r4inner = r1*r2*r3/(r1*r2 + r1*r3 + r2*r3 + 2*sqrt(r1*r2*r3*(r1 + r2 + r3)))
     r4outer = r1*r2*r3/(r1*r2 + r1*r3 + r2*r3 - 2*sqrt(r1*r2*r3*(r1 + r2 + r3)))
@@ -38,8 +36,6 @@ def circit(p1, p2, p3):
 
         Cx = -(c3*d1 - c1*d3)/(b3*c1 - b1*c3)
         Cy =  (b3*d1 - b1*d3)/(b3*c1 - b1*c3)
-        
- 
         return Cx, Cy
 
     return center(r4inner), r4inner, center(r4outer), r4outer
