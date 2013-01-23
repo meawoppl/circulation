@@ -18,20 +18,21 @@ radaiiList = list(radia(*tuple(pointsList)))
 print pointsList
 
 
-iCount = 1
+iCount = 2
 for i in range(iCount):
-
     newPoints = []
     newRadaii = []
-    for p1, p2, p3 in itertools.combinations(pointsList, 3):
-        pinner, pir, pouter, por = circit(p1, p2, p3)
+    for (i0, i1, i2) in itertools.combinations(range(len(pointsList)), 3):
+        p0, p1, p2 = pointsList[i0], pointsList[i1], pointsList[i2]
+        r0, r1, r2 = radaiiList[i0], radaiiList[i1], radaiiList[i2]
 
-        newPoints += [pinner,  pouter]
-        newRadaii += [abs(pir), abs(por)]
+        pB, pBr, pS, pSr = circit(p0, r0, p1, r1, p2, r2)
+
+        newPoints += [pB,  pS]
+        newRadaii += [pBr, pSr]
 
     pointsList += newPoints
     radaiiList += newRadaii
-
 
 # Make a pdf surface
 surf =  cairo.PDFSurface(open("test.pdf", "w"), 512, 512)
