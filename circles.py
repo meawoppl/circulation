@@ -2,6 +2,8 @@ import math
 from math import sqrt
 
 def radia(p1, p2, p3):
+    """Given three points returns three radia
+    """    
     
     a1 = math.sqrt( (p2[0] - p3[0])**2 + (p2[1] - p3[1])**2 )
     a2 = math.sqrt( (p1[0] - p3[0])**2 + (p1[1] - p3[1])**2 )
@@ -15,6 +17,9 @@ def radia(p1, p2, p3):
 
 
 def circit(p1, p2, p3):
+    """Given three points returns center[x], center[y], radius for 
+    ... inner and outer circles respectively
+    """
 
     r1, r2, r3 = radia(p1, p2, p3)
     
@@ -32,7 +37,7 @@ def circit(p1, p2, p3):
         d3 = (r3 + r4)**2 - (r2 + r4)**2 + p2[0]**2  - p3[0]**2 + p2[1]**2  - p3[1]**2
 
         Cx = -(c3*d1 - c1*d3)/(b3*c1 - b1*c3)
-        Cy =  (b3*d1) - b1*d3)/(b3*c1 - b1*c3)
+        Cy =  (b3*d1 - b1*d3)/(b3*c1 - b1*c3)
         
  
         return Cx, Cy
