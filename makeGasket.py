@@ -1,6 +1,6 @@
 from math import sin, cos, pi
 import cairo
-from circles import radii, circit, circIn, circOut
+from circles import radii, circit
 import itertools
 
 
@@ -15,35 +15,32 @@ startRadiiList = list(radii(*tuple(startPointList)))
 
 
 def circulate(p0, r0, p1, r1, p2, r2, p3, r3, depth):
-    startPointList = [p0, p1, p2]
-    startRadiiList = [r0, r1, r2]  
-
-    pointList = [p3]
-    radiiList = [r3]
+    pointList = [p0, p1, p2]
+    radiiList = [r0, r1, r2]  
 
     if depth==0:
-        return pointList, radiiList
+        return [p3], [r3]
     else:
         newPL = []
         newRL = []
         for indxs in itertools.combinations(range(3), 2):
             i0, i1 = indxs
-            if startRadiiList[i0]*startRadiiList[i1]*r3 > 0:
-                pNew, rNew = circIn(startPointList[i0], startRadiiList[i0], 
-                                    startPointList[i1], startRadiiList[i1],
+            pI, rI, pO, rO = circit(pointList[i0], radiiList[i0], 
+                                    pointList[i1], radiiList[i1],
                                     p3, r3)
+
+            if radiiList[i0]*radiiList[i1]*r3 > 0:
+                pNew, rNew = pI, rI
             else:
-                pNew, rNew = circOut(startPointList[i0], startRadiiList[i0], 
-                                    startPointList[i1], startRadiiList[i1],
-                                    p3, r3)
-            result = circulate(startPointList[i0], startRadiiList[i0], 
-                               startPointList[i1], startRadiiList[i1],
+                pNew, rNew = pO, rO
+            result = circulate(pointList[i0], radiiList[i0], 
+                               pointList[i1], radiiList[i1],
                                p3, r3, pNew, rNew, depth-1)
             newPL += result[0]
             newRL += result[1]
-        return pointList+newPL, radiiList+newRL
+        return [p3]+newPL, [r3]+newRL
 
-loops = 11
+loops = 8
 
 p0, p1, p2 = startPointList
 r0, r1, r2 = startRadiiList
