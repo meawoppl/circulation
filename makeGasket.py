@@ -1,47 +1,59 @@
 from math import sin, cos, pi
 import cairo
-from circles import radia, circit
-
+from circles import radii, circit, circIn, circOut
 import itertools
 
 
-pointList = []
+startPointList = []
 for i in range(3):
     x = cos(2.0 * pi * i / 3)
     y = sin(2.0 * pi * i / 3)
 
-    pointList.append((x,y))
+    startPointList.append((x,y))
     
-radaiiList = list(radia(*tuple(pointList)))
+startRadiiList = list(radii(*tuple(startPointList)))
 
 
-def circulate(p0, r0, p1, r1, p2, r2, depth):
-    pointList = [p0, p1, p2]
-    radaiList = [r0, r1, r2]
-    p3, r3, p4, r4 = circit(p0, r0, p1, r1, p2, r2)
+def circulate(p0, r0, p1, r1, p2, r2, p3, r3, depth):
+    startPointList = [p0, p1, p2]
+    startRadiiList = [r0, r1, r2]  
 
-    pointList += [p3, p4]
-    radaiList += [r3, r4]
-    
+    pointList = [p3]
+    radiiList = [r3]
+
     if depth==0:
-        return pointList, radaiList
+        return pointList, radiiList
     else:
         newPL = []
         newRL = []
         for indxs in itertools.combinations(range(3), 2):
             i0, i1 = indxs
-            for i2 in [3, 4]:
-                result = circulate(pointList[i0], radaiList[i0], 
-                                   pointList[i1], radaiList[i1],
-                                   pointList[i2], radaiList[i2], depth-1)
-                newPL += result[0]
-                newRL += result[1]
-        return pointList+newPL, radaiList+newRL
+            if startRadiiList[i0]*startRadiiList[i1]*r3 > 0:
+                pNew, rNew = circIn(startPointList[i0], startRadiiList[i0], 
+                                    startPointList[i1], startRadiiList[i1],
+                                    p3, r3)
+            else:
+                pNew, rNew = circOut(startPointList[i0], startRadiiList[i0], 
+                                    startPointList[i1], startRadiiList[i1],
+                                    p3, r3)
+            result = circulate(startPointList[i0], startRadiiList[i0], 
+                               startPointList[i1], startRadiiList[i1],
+                               p3, r3, pNew, rNew, depth-1)
+            newPL += result[0]
+            newRL += result[1]
+        return pointList+newPL, radiiList+newRL
 
-pl, rl = circulate(pointList[0], radaiiList[0], 
-                   pointList[1], radaiiList[1],
-                   pointList[2], radaiiList[2],5)
+loops = 11
 
+p0, p1, p2 = startPointList
+r0, r1, r2 = startRadiiList
+p3, r3, p4, r4 = circit(p0, r0, p1, r1, p2, r2)
+
+plot = [p0, p1, p2] + circulate(p0, r0, p1, r1, p2, r2, p3, r3, loops)[0] + circulate(p0, r0, p1, r1, p2, r2, p4, r4, loops)[0]
+
+rlot = [r0, r1, r2] + circulate(p0, r0, p1, r1, p2, r2, p3, r3, loops)[1]  + circulate(p0, r0, p1, r1, p2, r2, p4, r4, loops)[1]
+
+print len(plot), ' circles in ', loops, ' loops.'
 
 # Make a pdf surface
 surf =  cairo.PDFSurface(open("test.pdf", "w"), 512, 512)
@@ -61,8 +73,7 @@ def drawCircle(ctx, x, y, r):
     ctx.restore()
     ctx.stroke()
     
-for pt, rad in zip(pl, rl):
-    print pt, rad
+for pt, rad in zip(plot, rlot):
     drawCircle(ctx, pt[0], pt[1], abs(rad))
 
 surf.finish()
