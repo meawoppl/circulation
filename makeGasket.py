@@ -3,22 +3,30 @@ import cairo
 from circles import radii, circit
 import itertools
 
+# """
+# original
+# """
+# startPointList = []
+# for i in range(3):
+#     x = 2.5*cos(2.0 * pi * i / 3)
+#     y = 2.5*sin(2.0 * pi * i / 3)
 
-startPointList = []
-for i in range(3):
-    x = cos(2.0 * pi * i / 3)
-    y = sin(2.0 * pi * i / 3)
+#     startPointList.append((x,y))
 
-    startPointList.append((x,y))
-    
+# """
+# anomalus
+# """
+# startPointList = [(-2, 2), (0, 0), (2, 2)]
+
+startPointList = [(-1, -2), (0, 1), (1, -2)]
+
 startRadiiList = list(radii(*tuple(startPointList)))
-
 
 def circulate(p0, r0, p1, r1, p2, r2, p3, r3, depth):
     pointList = [p0, p1, p2]
     radiiList = [r0, r1, r2]  
 
-    if depth==0:
+    if depth == 0:
         return [p3], [r3]
     else:
         newPL = []
@@ -46,11 +54,9 @@ p0, p1, p2 = startPointList
 r0, r1, r2 = startRadiiList
 p3, r3, p4, r4 = circit(p0, r0, p1, r1, p2, r2)
 
-plot = [p0, p1, p2] + circulate(p0, r0, p1, r1, p2, r2, p3, r3, loops)[0] + circulate(p0, r0, p1, r1, p2, r2, p4, r4, loops)[0]
+plot = [p0, p1, p2] + circulate(p0, r0, p1, r1, p2, r2, p4, r4, loops)[0] + circulate(p0, r0, p1, r1, p2, r2, p3, r3, loops)[0]
 
-rlot = [r0, r1, r2] + circulate(p0, r0, p1, r1, p2, r2, p3, r3, loops)[1]  + circulate(p0, r0, p1, r1, p2, r2, p4, r4, loops)[1]
-
-print len(plot), ' circles in ', loops, ' loops.'
+rlot = [r0, r1, r2] + circulate(p0, r0, p1, r1, p2, r2, p4, r4, loops)[1] + circulate(p0, r0, p1, r1, p2, r2, p3, r3, loops)[1]
 
 # Make a pdf surface
 surf =  cairo.PDFSurface(open("test.pdf", "w"), 512, 512)
@@ -58,10 +64,16 @@ surf =  cairo.PDFSurface(open("test.pdf", "w"), 512, 512)
 # Get a context object
 ctx = cairo.Context(surf)
 
-ctx.set_line_width(0.0001)
+width = 0.001
+ctx.set_line_width(width)
 
+# both center and scale are defined by biggest circle
+# print '#3 center: ', plot[3], ', radius: ', rlot[3]
+# scale here and center in draw step by shifting
+biggestP = plot[3]
+biggestR = abs(rlot[3])
 ctx.translate(512/2, 512/2)
-ctx.scale(50, 50)
+ctx.scale(250/biggestR, 250/biggestR)
 
 def drawCircle(ctx, x, y, r):
     ctx.save()
@@ -70,8 +82,13 @@ def drawCircle(ctx, x, y, r):
     ctx.restore()
     ctx.stroke()
     
+cnt = 0
 for pt, rad in zip(plot, rlot):
-    drawCircle(ctx, pt[0], pt[1], abs(rad))
+    if abs(rad) > width:
+        drawCircle(ctx, pt[0] - biggestP[0], pt[1] - biggestP[1], abs(rad))
+        cnt+=1
+
+
+print cnt, '/', len(plot), ' circles in ', loops, ' loops.'
 
 surf.finish()
-
