@@ -88,13 +88,9 @@ def drawCircle(ctx, x, y, r):
     
 cnt = 0
 for pt, rad in zip(plot, rlot):
-    if abs(rad) > 5*width:
-        if abs(rad) == biggestR:
-            thisRadius = biggestR*1.03
-        else:
-            thisRadius = abs(rad)*0.9
-        drawCircle(ctx, pt[0] - biggestP[0], pt[1] - biggestP[1], thisRadius )
-        # drawCircle(ctx, pt[0] - biggestP[0], pt[1] - biggestP[1], abs(rad-5*width))
+    if abs(rad) > 10*width:
+        drawCircle(ctx, pt[0] - biggestP[0], pt[1] - biggestP[1], abs(rad))
+        drawCircle(ctx, pt[0] - biggestP[0], pt[1] - biggestP[1], abs(rad-5*width))
         cnt+=1
 
 print cnt, '/', len(plot), ' circles in ', loops, ' loops.'
