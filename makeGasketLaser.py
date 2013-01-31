@@ -89,12 +89,11 @@ def drawCircle(ctx, x, y, r):
 cnt = 0
 for pt, rad in zip(plot, rlot):
     if abs(rad) > 5*width:
-        if abs(rad) == biggestR:
-            thisRadius = biggestR*1.03
-        else:
-            thisRadius = abs(rad)*0.9
-        drawCircle(ctx, pt[0] - biggestP[0], pt[1] - biggestP[1], thisRadius )
-        # drawCircle(ctx, pt[0] - biggestP[0], pt[1] - biggestP[1], abs(rad-5*width))
+        # this is the line you meant to comment out
+        # drawCircle(ctx, pt[0] - biggestP[0], pt[1] - biggestP[1], abs(rad))
+        # note how the negative sign of out-scribed (opposite to inscribed) 
+        # makes the following line work with no if statements. pretty.
+        drawCircle(ctx, pt[0] - biggestP[0], pt[1] - biggestP[1], abs(rad-5*width))
         cnt+=1
 
 print cnt, '/', len(plot), ' circles in ', loops, ' loops.'
