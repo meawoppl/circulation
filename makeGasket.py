@@ -22,73 +22,74 @@ startPointList = [(-1, -2), (0, 1), (1, -2)]
 
 startRadiiList = list(radii(*tuple(startPointList)))
 
-def circulate(p0, r0, p1, r1, p2, r2, p3, r3, depth):
-    pointList = [p0, p1, p2]
-    radiiList = [r0, r1, r2]  
+# next: rewrite all with circles def as c = [r, px, py]
+# rad = c[0] and coordinates of the center c[1] and c[2]
+# latter adding c[3] to make a 3d gasket with spheres
+
+def circulate(c0, c1, c2, c3, depth):
+    cList = [c0, c1, c2]
 
     if depth == 0:
-        return [p3], [r3]
+        return c3
     else:
-        newPL = []
-        newRL = []
+        new = []
         for indxs in itertools.combinations(range(3), 2):
             i0, i1 = indxs
-            pI, rI, pO, rO = circit(pointList[i0], radiiList[i0], 
-                                    pointList[i1], radiiList[i1],
-                                    p3, r3)
+            cI, cO = circit(cList[i0], cList[i1], c3)
 
-            if radiiList[i0]*radiiList[i1]*r3 > 0:
-                pNew, rNew = pI, rI
+            if cList[i0][0]*cList[i1][0]*c3[0] > 0:
+                cNew = cI
             else:
-                pNew, rNew = pO, rO
-            result = circulate(pointList[i0], radiiList[i0], 
-                               pointList[i1], radiiList[i1],
-                               p3, r3, pNew, rNew, depth-1)
-            newPL += result[0]
-            newRL += result[1]
-        return [p3]+newPL, [r3]+newRL
+                cNew = cO
 
-loops = 8
+            result = circulate(cList[i0], cList[i1], 
+                               cNew, depth-1)
+            new += result
+        return c3 + new
 
-p0, p1, p2 = startPointList
-r0, r1, r2 = startRadiiList
-p3, r3, p4, r4 = circit(p0, r0, p1, r1, p2, r2)
+loops = 4
 
-plot = [p0, p1, p2] + circulate(p0, r0, p1, r1, p2, r2, p4, r4, loops)[0] + circulate(p0, r0, p1, r1, p2, r2, p3, r3, loops)[0]
+c3, c4 = circit(c0, c1, c2)
 
-rlot = [r0, r1, r2] + circulate(p0, r0, p1, r1, p2, r2, p4, r4, loops)[1] + circulate(p0, r0, p1, r1, p2, r2, p3, r3, loops)[1]
+clot = [c0, c1, c2] + circulate(c0, c1, c2, c4, loops) + circulate(c0, c1, c2, c3, loops)
+
+w = 512
+h = 512
 
 # Make a pdf surface
-surf =  cairo.PDFSurface(open("test.pdf", "w"), 512, 512)
+surf =  cairo.PDFSurface(open("test.pdf", "w"), w, h)
 
 # Get a context object
 ctx = cairo.Context(surf)
 
-width = 0.001
-ctx.set_line_width(width)
+lineWidth = 0.001
+ctx.set_line_width(lineWidth)
 
 # both center and scale are defined by biggest circle
 # print '#3 center: ', plot[3], ', radius: ', rlot[3]
 # scale here and center in draw step by shifting
+
+
+# next: translate and scale the data not the context
 biggestP = plot[3]
 biggestR = abs(rlot[3])
-ctx.translate(512/2, 512/2)
+ctx.translate(w/2, h/2)
 ctx.scale(250/biggestR, 250/biggestR)
 
-def drawCircle(ctx, x, y, r):
+def drawCircle(ctx, c):
     ctx.save()
-    ctx.move_to(x-r, y)
-    ctx.arc(x, y, r, -pi, pi)
+    ctx.move_to(c[1] - c[0], c[2])
+    ctx.arc(c[1], c[2], c[0], -pi, pi)
     ctx.restore()
     ctx.stroke()
     
 cnt = 0
-for pt, rad in zip(plot, rlot):
-    if abs(rad) > width:
-        drawCircle(ctx, pt[0] - biggestP[0], pt[1] - biggestP[1], abs(rad))
-        cnt+=1
+with  open('circdata', 'w') as datafile:
+    for c in clot:
+        if abs(c[0]) > lineWidth:
+            drawCircle(ctx, abs(c[0]), c[1] - biggest[1], c[2] - biggest[2])
+            cnt+=1
+            datafile.write(str(abs(c[0])) + ", " + str(c[1] - biggest[1]) + ", " + str(pt[2] - biggest[2]) + "\n")
 
-
-print cnt, '/', len(plot), ' circles in ', loops, ' loops.'
-
+print cnt, '/', len(clot), ' circles in ', loops, ' loops.'
 surf.finish()
