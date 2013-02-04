@@ -48,7 +48,7 @@ def circulate(p0, r0, p1, r1, p2, r2, p3, r3, depth):
             newRL += result[1]
         return [p3]+newPL, [r3]+newRL
 
-loops = 8
+loops = 3
 
 p0, p1, p2 = startPointList
 r0, r1, r2 = startRadiiList
@@ -70,6 +70,9 @@ ctx.set_line_width(width)
 # both center and scale are defined by biggest circle
 # print '#3 center: ', plot[3], ', radius: ', rlot[3]
 # scale here and center in draw step by shifting
+
+
+# next: translate and scale the data not the context
 biggestP = plot[3]
 biggestR = abs(rlot[3])
 ctx.translate(512/2, 512/2)
@@ -83,12 +86,12 @@ def drawCircle(ctx, x, y, r):
     ctx.stroke()
     
 cnt = 0
-for pt, rad in zip(plot, rlot):
-    if abs(rad) > width:
-        drawCircle(ctx, pt[0] - biggestP[0], pt[1] - biggestP[1], abs(rad))
-        cnt+=1
-
+with  open('circdata', 'w') as datafile:
+    for pt, rad in zip(plot, rlot):
+        if abs(rad) > width:
+            drawCircle(ctx, pt[0] - biggestP[0], pt[1] - biggestP[1], abs(rad))
+            cnt+=1
+            datafile.write(str(pt[0] - biggestP[0]) + ", " + str(pt[1] - biggestP[1]) + ", " + str(abs(rad)) + "\n")
 
 print cnt, '/', len(plot), ' circles in ', loops, ' loops.'
-
 surf.finish()
