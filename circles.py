@@ -43,7 +43,7 @@ def circit(c1, c2, c3):
     rI = r1*r2*r3/(r1*r2 + r1*r3 + r2*r3 + 2*sqrt(r1*r2*r3*(r1 + r2 + r3)))
     rO = r1*r2*r3/(r1*r2 + r1*r3 + r2*r3 - 2*sqrt(r1*r2*r3*(r1 + r2 + r3)))
 
-    return [rI] +  center(c1, c2, c3, rI), [rO] + center(c1, c2, c3, rO)
+    return circIn(c1, c2, c3), circOut(c1, c2, c3)
 
 def circIn(c1, c2, c3):
     """Given three circles returns inner circle only
